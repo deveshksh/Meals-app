@@ -38,5 +38,19 @@ Django along with MySql is used in the server side. It is chosen because of its 
 These techniques enabled us to form an in-depth understanding of the requirements for
 our 4epicure app and helped us model an efficient and user-friendly solution.
 
+## Functional and non-functional requirements
+The functional requirements for this app are as follows:
+* Integration with Google Maps to display regional dishes in the user's locality.
+* Voice assistant to read out recipes for convenient cooking.
+* Image recognition feature to detect food items.
+* A recommendation system for personalized user experience. <br>
+
+The non-functional requirements for your app are as follows:
+* User-friendly interface for students and travelers.
+* Quick and efficient performance.
+* High level of security for user data.
+* Compatibility with multiple devices and operating systems.
+* Responsiveness and scalability for future growth.
+
 ## APIs
 We have created APIs to communicate with the Recipe and Grocery model of the database. The map feature has been implemented in the front end where the regional dishes will be diplayed on google maps. The APIs will only cover the the Recipee search and CRUD part.
