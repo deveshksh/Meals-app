@@ -37,3 +37,6 @@ application which is secure and scalable.
 Django along with MySql is used in the server side. It is chosen because of its scalability, security and rapid speed of development.<br><br>
 These techniques enabled us to form an in-depth understanding of the requirements for
 our 4epicure app and helped us model an efficient and user-friendly solution.
+
+## APIs
+We have created APIs to communicate with the Recipe and Grocery model of the database. The map feature has been implemented in the front end where the regional dishes will be diplayed on google maps. The APIs will only cover the the Recipee search and CRUD part.
