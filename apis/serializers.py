@@ -11,7 +11,8 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = (
             "name",
-            "quantity"
+            "quantity",
+            "unit"
         )
 
 class RecipeSerializer(serializers.ModelSerializer):
