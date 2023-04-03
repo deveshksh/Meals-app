@@ -24,7 +24,6 @@ class Profile(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length = 30)
-    steps = models.TextField()
     user = models.ForeignKey(
         User,
         related_name = "recipes",
@@ -43,6 +42,14 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+class Step(models.Model):
+    body = models.TextField()
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name = "steps",
+        on_delete = models.CASCADE,
+    )
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=30)

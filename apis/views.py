@@ -76,16 +76,16 @@ class LikeRecipe(APIView):
             recipe.disliked_by.remove(request.user)
             recipe.liked_by.add(request.user)
             serializer = RecipeSerializer(recipe)
-            return Response(serializer.data)
+            return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
 
         elif request.user in users_who_liked_post:
             recipe.liked_by.remove(request.user)
             serializer = RecipeSerializer(recipe)
-            return Response(serializer.data)
+            return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
         
         recipe.liked_by.add(request.user)
         serializer = RecipeSerializer(recipe)
-        return Response(serializer.data)
+        return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
 
 class DislikeRecipe(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -105,13 +105,13 @@ class DislikeRecipe(APIView):
             recipe.liked_by.remove(request.user)
             recipe.disliked_by.add(request.user)
             serializer = RecipeSerializer(recipe)
-            return Response(serializer.data)
+            return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
 
         elif request.user in users_who_disliked_post:
             recipe.disliked_by.remove(request.user)
             serializer = RecipeSerializer(recipe)
-            return Response(serializer.data)
+            return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
         
         recipe.disliked_by.add(request.user)
         serializer = RecipeSerializer(recipe)
-        return Response(serializer.data)
+        return Response(serializer.data) #sending the data to test the api, send only status code in final implementation

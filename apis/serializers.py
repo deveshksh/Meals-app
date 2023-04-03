@@ -16,8 +16,16 @@ class IngredientSerializer(serializers.ModelSerializer):
             "unit"
         )
 
+class StepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Step
+        fields = (
+            "body",
+        )
+
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many = True)
+    steps = StepSerializer(many = True)
     user = UserSerializer(read_only = True )
     liked_by = UserSerializer(read_only = True, many = True)
     disliked_by = UserSerializer(read_only = True, many = True)
@@ -34,10 +42,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
+        steps_data = validated_data.pop('steps')
         recipe = Recipe.objects.create(**validated_data)
 
         for ingredient_data in ingredients_data:
             Ingredient.objects.create(recipe=recipe, **ingredient_data)
+        
+        for step_data in steps_data:
+            Step.objects.create(recipe=recipe, **step_data)
 
         return recipe
     
