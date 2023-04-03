@@ -6,6 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username")
 
+
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -17,15 +18,19 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many = True)
-    user = UserSerializer(read_only = True)
+    user = UserSerializer(read_only = True )
+    liked_by = UserSerializer(read_only = True, many = True)
+    disliked_by = UserSerializer(read_only = True, many = True)
     class Meta:
         model = Recipe
         fields = (
+            "id",
             "name",
             "steps",
             "user",
-            "ingredients"
-
+            "ingredients",
+            "liked_by",
+            "disliked_by"
         )
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
@@ -35,4 +40,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             Ingredient.objects.create(recipe=recipe, **ingredient_data)
 
         return recipe
+    
+    def get_liked_by(self, obj):
+        return obj.liked_by.values('id', 'username')
+
+    def get_disliked_by(self, obj):
+        return obj.disliked_by.values('id', 'username')
     

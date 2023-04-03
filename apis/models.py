@@ -2,6 +2,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.contrib.auth.models import User 
 from django.db.models.signals import post_save
+from django.core.exceptions import ValidationError
 
 class Preference(models.Model):
     name = models.CharField(max_length=50)
@@ -28,6 +29,16 @@ class Recipe(models.Model):
         User,
         related_name = "recipes",
         on_delete = models.DO_NOTHING
+    )
+    liked_by = models.ManyToManyField(
+        User,
+        related_name = "liked_recipes",
+        blank = True,
+    )
+    disliked_by = models.ManyToManyField(
+        User,
+        related_name = "disliked_recipes",
+        blank = True,
     )
 
     def __str__(self):
