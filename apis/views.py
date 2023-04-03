@@ -57,3 +57,61 @@ class RecipeDetail(APIView):
             queryset.delete()
             return Response(status = status.HTTP_204_NO_CONTENT)
         return Response(status = status.HTTP_401_UNAUTHORIZED)
+
+class LikeRecipe(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, id):
+        try:
+            return Recipe.objects.get(id = id)
+        except Recipe.DoesNotExist:
+            raise Http404
+
+    def put(self, request, id):
+        recipe = self.get_object(id)
+        users_who_disliked_post = recipe.disliked_by.all()
+        users_who_liked_post = recipe.liked_by.all()
+
+        if request.user in users_who_disliked_post:
+            recipe.disliked_by.remove(request.user)
+            recipe.liked_by.add(request.user)
+            serializer = RecipeSerializer(recipe)
+            return Response(serializer.data)
+
+        elif request.user in users_who_liked_post:
+            recipe.liked_by.remove(request.user)
+            serializer = RecipeSerializer(recipe)
+            return Response(serializer.data)
+        
+        recipe.liked_by.add(request.user)
+        serializer = RecipeSerializer(recipe)
+        return Response(serializer.data)
+
+class DislikeRecipe(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, id):
+        try:
+            return Recipe.objects.get(id = id)
+        except Recipe.DoesNotExist:
+            raise Http404
+
+    def put(self, request, id):
+        recipe = self.get_object(id)
+        users_who_disliked_post = recipe.disliked_by.all()
+        users_who_liked_post = recipe.liked_by.all()
+
+        if request.user in users_who_liked_post:
+            recipe.liked_by.remove(request.user)
+            recipe.disliked_by.add(request.user)
+            serializer = RecipeSerializer(recipe)
+            return Response(serializer.data)
+
+        elif request.user in users_who_disliked_post:
+            recipe.disliked_by.remove(request.user)
+            serializer = RecipeSerializer(recipe)
+            return Response(serializer.data)
+        
+        recipe.disliked_by.add(request.user)
+        serializer = RecipeSerializer(recipe)
+        return Response(serializer.data)
