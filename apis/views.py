@@ -12,6 +12,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 
 class SearchAPI(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         search_query = request.query_params.get('q', '')
         results = Recipe.objects.filter(Q(name__icontains = search_query))
@@ -19,7 +20,7 @@ class SearchAPI(APIView):
         return Response(serializer.data)
 
 class RecipeList(APIView):
-    
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         queryset = Recipe.objects.all()
         serializer = RecipeSerializer(queryset, many = True)
@@ -33,7 +34,7 @@ class RecipeList(APIView):
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 class RecipeDetail(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     def get_object(self, id):
         try:
             return Recipe.objects.get(id = id)
@@ -136,6 +137,7 @@ class UserListView(APIView):
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 class UserDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, id, format = None, *args, **kwargs):
         queryset = User.objects.get(id = id)
         serializer = ProfileSerializer(queryset)
