@@ -6,6 +6,10 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework import permissions
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
 class SearchAPI(APIView):
     def get(self, request):
@@ -115,3 +119,37 @@ class DislikeRecipe(APIView):
         recipe.disliked_by.add(request.user)
         serializer = RecipeSerializer(recipe)
         return Response(serializer.data) #sending the data to test the api, send only status code in final implementation
+
+
+class UserListView(APIView):
+    
+    def get(request, format = None):
+        queryset = User.objects.all()
+        serializer = ProfileSerializer(queryset, many = True)
+        return Response(serializer.data)
+    
+    def post(self, request, format = None):
+        serializer = ProfileSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(status = status.HTTP_400_BAD_REQUEST)
+
+class UserDetailView(APIView):
+    def get(self, request, id, format = None, *args, **kwargs):
+        queryset = User.objects.get(id = id)
+        serializer = ProfileSerializer(queryset)
+        return Response(serializer.data)
+    
+class UserLoginView(APIView):
+    @csrf_exempt
+    def post(self, request, format = None):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(request, username = username, password = password)
+        
+        if user is not None:
+            token, created = Token.objects.get_or_create(user = user)
+            return Response({"token": token.key})
+        return Response(status = status.HTTP_400_BAD_REQUEST)
+    

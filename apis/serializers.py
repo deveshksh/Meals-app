@@ -59,3 +59,18 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_disliked_by(self, obj):
         return obj.disliked_by.values('id', 'username')
     
+class ProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only = True)
+    recipes = RecipeSerializer(many = True, read_only = True)
+
+    class Meta:
+        model = User
+        fields = ("id", "username", "recipes", "email", "password")
+    
+    def create(self, valid_data):
+        user = User.objects.create_user(
+            username = valid_data["username"],
+            password = valid_data["password"],
+            email = valid_data["email"]
+        )
+        return user
