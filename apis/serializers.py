@@ -26,7 +26,7 @@ class StepSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many = True)
     steps = StepSerializer(many = True)
-    user = UserSerializer(read_only = True )
+    user = UserSerializer(read_only = True)
     liked_by = UserSerializer(read_only = True, many = True)
     disliked_by = UserSerializer(read_only = True, many = True)
     class Meta:
