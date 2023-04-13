@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
+from googleapiclient.discovery import build
+
 
 class SearchAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -154,4 +156,33 @@ class UserLoginView(APIView):
             token, created = Token.objects.get_or_create(user = user)
             return Response({"token": token.key})
         return Response(status = status.HTTP_400_BAD_REQUEST)
-    
+
+class YoutubeSearch(APIView):
+    def get(self, request, recipe_id):
+        # Get the recipe object from the database
+        recipe = Recipe.objects.get(id=recipe_id)
+
+        # Use the YouTube Data API to search for videos with the recipe title
+        api_key = 'AIzaSyBI2-BjByIIfn_VDHm337dXScXxBdTwhz0'
+        youtube = build('youtube', 'v3', developerKey=api_key)
+        search_response = youtube.search().list(
+            q=recipe.name + "recipe",
+            type='video',
+            part='id,snippet',
+            maxResults=20
+        ).execute()
+
+        # Parse the API response and return the search results
+        videos = []
+        for search_result in search_response.get('items', []):
+            video_id = search_result['id']['videoId']
+            video_title = search_result['snippet']['title']
+            video_thumbnail = search_result['snippet']['thumbnails']['medium']['url']
+            video = {
+                'id': video_id,
+                'title': video_title,
+                'thumbnail': video_thumbnail
+            }
+            videos.append(video)
+
+        return Response(videos)

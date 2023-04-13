@@ -9,5 +9,6 @@ urlpatterns = [
     path("<int:id>/dislike/", DislikeRecipe.as_view()),
     path("users/", UserListView.as_view()),
     path("users/<int:id>/", UserDetailView.as_view()),
-    path("users/login/", UserLoginView.as_view())
+    path("users/login/", UserLoginView.as_view()),
+    path("youtube/<int:recipe_id>/", YoutubeSearch.as_view()),
 ]
