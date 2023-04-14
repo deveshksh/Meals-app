@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
+from googleapiclient.discovery import build
 import json
 from django.http import JsonResponse
 from .models import Recipe
@@ -32,8 +33,6 @@ class RecipeList(APIView):
         serializer = RecipeSerializer(queryset, many = True)
         return Response(serializer.data)
     
-        
-    
     def post(self, request):
         serializer = RecipeSerializer(data = request.data)
         if serializer.is_valid():
@@ -42,7 +41,7 @@ class RecipeList(APIView):
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 class RecipeDetail(APIView):
-    #permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     def get_object(self, id):
         try:
             return Recipe.objects.get(id = id)
@@ -53,11 +52,11 @@ class RecipeDetail(APIView):
         queryset = self.get_object(id)
         serializer = RecipeSerializer(queryset)
         translator = Translator()
-        
+
         description = serializer.data['name']
         translated = translator.translate(description,src = 'en', dest='hi')
         translated_text = translated.text
-        
+
         updated_data = dict(serializer.data)
         updated_data['name'] = translated_text
         # Create a new instance of the serializer with the updated data
@@ -65,7 +64,6 @@ class RecipeDetail(APIView):
         updated_data_json = json.dumps(updated_data)
 
         return Response(updated_data_json)
- 
     
     def put(self, request, id):
         queryset = self.get_object(id)
@@ -85,54 +83,30 @@ class RecipeDetail(APIView):
         return Response(status = status.HTTP_401_UNAUTHORIZED)
     
     
-# class RecipeTranslate(APIView):
-#     def get_object(self, id):
-#         try:
-#             return Recipe.objects.get(id=id)
-#         except Recipe.DoesNotExist:
-#             raise Http404
-
-#     def get(self, request, id):
-#         recipe = self.get_object(id)
-#         serializer = RecipeSerializer(recipe)
-
-#         # Get the recipe data in JSON format
-#         recipe_json = json.dumps(serializer.data)
-
-#         # Translate the recipe data into Hindi using Google Cloud Translation API
-#         translate_client = translate.Client()
-#         translation = translate_client.translate(recipe_json, target_language='hi')
-#         recipe_translated = translation['translatedText']
-
-#         # Return the translated recipe data in JSON format
-#         return JsonResponse(json.loads(recipe_translated), safe=False)
-
-
 def RecipeTranslate(request, id):
     recipe = Recipe.objects.get(id=id)
     serializer = RecipeSerializer(recipe)
     data = serializer.data
-    
+
     # Extract the recipe name and ingredients
     recipe_name = data['name']
     recipe_ingredients = data['ingredients']
-    
+
     # Create a translator object
     translator = Translator()
-    
+
     # Translate the recipe name and ingredients to Hindi
     hindi_recipe_name = translator.translate(recipe_name, dest='hi').text
     hindi_recipe_ingredients = []
     for ingredient in recipe_ingredients:
         hindi_recipe_ingredients.append(translator.translate(ingredient, dest='hi').text)
-    
+
     # Replace the English recipe name and ingredients with their Hindi translations
     data['name'] = hindi_recipe_name
     data['ingredients'] = hindi_recipe_ingredients
-    
+
     return Response(data)
 
-    
 
 class LikeRecipe(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -225,4 +199,33 @@ class UserLoginView(APIView):
             token, created = Token.objects.get_or_create(user = user)
             return Response({"token": token.key})
         return Response(status = status.HTTP_400_BAD_REQUEST)
-    
+
+class YoutubeSearch(APIView):
+    def get(self, request, recipe_id):
+        # Get the recipe object from the database
+        recipe = Recipe.objects.get(id=recipe_id)
+
+        # Use the YouTube Data API to search for videos with the recipe title
+        api_key = 'AIzaSyBI2-BjByIIfn_VDHm337dXScXxBdTwhz0'
+        youtube = build('youtube', 'v3', developerKey=api_key)
+        search_response = youtube.search().list(
+            q=recipe.name + "recipe",
+            type='video',
+            part='id,snippet',
+            maxResults=20
+        ).execute()
+
+        # Parse the API response and return the search results
+        videos = []
+        for search_result in search_response.get('items', []):
+            video_id = search_result['id']['videoId']
+            video_title = search_result['snippet']['title']
+            video_thumbnail = search_result['snippet']['thumbnails']['medium']['url']
+            video = {
+                'id': video_id,
+                'title': video_title,
+                'thumbnail': video_thumbnail
+            }
+            videos.append(video)
+
+        return Response(videos)
